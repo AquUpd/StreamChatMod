@@ -11,10 +11,10 @@ import com.github.twitch4j.auth.providers.TwitchIdentityProvider;
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.enums.NoticeTag;
 import com.github.twitch4j.chat.events.channel.*;
+import com.github.twitch4j.eventsub.events.ChannelCheerEvent;
 import com.github.twitch4j.eventsub.events.ChannelPointsCustomRewardRedemptionEvent;
 import com.github.twitch4j.helix.domain.*;
-import com.github.twitch4j.pubsub.events.ChannelPointsRedemptionEvent;
-import com.github.twitch4j.pubsub.events.RewardRedeemedEvent;
+import com.github.twitch4j.pubsub.events.*;
 import com.github.twitch4j.tmi.domain.Chatters;
 import com.sun.net.httpserver.HttpServer;
 import lombok.Getter;
@@ -23,6 +23,7 @@ import me.mini_bomba.streamchatmod.commands.TwitchChatCommand;
 import me.mini_bomba.streamchatmod.commands.TwitchCommand;
 import me.mini_bomba.streamchatmod.runnables.TwitchFollowSoundScheduler;
 import me.mini_bomba.streamchatmod.runnables.TwitchMessageHandler;
+import me.mini_bomba.streamchatmod.utils.ColorUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.event.ClickEvent;
@@ -51,6 +52,8 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+
+import static com.github.twitch4j.pubsub.enums.PubSubType.LISTEN;
 
 @SuppressWarnings({"ConstantConditions", "unused"})
 @Mod(modid = StreamChatMod.MODID, version = StreamChatMod.VERSION, clientSideOnly = true)
@@ -662,8 +665,9 @@ public class StreamChatMod {
                     .withEnableHelix(true)
                     .withEnableTMI(true)
                     .build();
+            List<String> channelIds = Arrays.stream(config.twitchChannels.getStringList()).map(this::getTwitchUserByName).filter(Objects::nonNull).map(User::getId).collect(Collectors.toList());
+
             if (syncEmotes) {
-                List<String> channelIds = Arrays.stream(config.twitchChannels.getStringList()).map(this::getTwitchUserByName).filter(Objects::nonNull).map(User::getId).collect(Collectors.toList());
                 StreamUtils.queueAddMessage(EnumChatFormatting.GRAY + "Synchronising global badge cache...");
                 emotes.syncGlobalBadges(null);
                 StreamUtils.queueAddMessage(EnumChatFormatting.GRAY + "Synchronising channel badge cache...");
@@ -673,12 +677,19 @@ public class StreamChatMod {
                 StreamUtils.queueAddMessage(EnumChatFormatting.GRAY + "Synchronising channel emote cache...");
                 emotes.syncAllChannelEmotes(null, channelIds);
             }
+            twitch.getPubSub().listenForChannelPointsRedemptionEvents(credential, getTwitchUserByName(config.twitchSelectedChannel.getString()).getId());
+            twitch.getPubSub().listenForSubscriptionEvents(credential, getTwitchUserByName(config.twitchSelectedChannel.getString()).getId());
+            twitch.getPubSub().listenForCheerEvents(credential, getTwitchUserByName(config.twitchSelectedChannel.getString()).getId());
 
-            twitch.getPubSub().listenForChannelPointsRedemptionEvents(credential, "itsnekoli");
+            twitch.getEventManager().onEvent(ChannelPointsRedemptionEvent.class, this::onTwitchReward);
+            twitch.getEventManager().onEvent(ChannelSubscribeEvent.class, this::onTwitchSub);
+            twitch.getEventManager().onEvent(ChannelBitsEvent.class, this::onTwitchCheer);
+
             twitch.getEventManager().onEvent(ChannelMessageEvent.class, this::onTwitchMessage);
             twitch.getEventManager().onEvent(FollowEvent.class, this::onTwitchFollow);
             twitch.getEventManager().onEvent(ChannelNoticeEvent.class, this::onTwitchNotice);
-            twitch.getEventManager().onEvent(RewardRedeemedEvent.class, this::onTwitchReward);
+            twitch.getEventManager().onEvent(RaidEvent.class, this::onTwitchRaid);
+            twitch.getEventManager().onEvent(InboundHostEvent.class, this::onTwitchHost);
             twitch.getEventManager().onEvent(DeleteMessageEvent.class, this::onTwitchMessageDeleted);
             twitch.getEventManager().onEvent(ClearChatEvent.class, this::onTwitchChatClear);
             twitch.getEventManager().onEvent(UserTimeoutEvent.class, this::onUserTimedOut);
@@ -692,15 +703,18 @@ public class StreamChatMod {
             for (String channel : channels) {
                 chat.joinChannel(channel);
             }
+
             if (config.followEventEnabled.getBoolean()) twitch.getClientHelper().enableFollowEventListener(channels);
             // Get username & scopes
             OAuth2Credential queriedCredential = twitchCredentialManager.getIdentityProviderByName("twitch")
                     .flatMap(provider -> provider instanceof TwitchIdentityProvider ? ((TwitchIdentityProvider) provider)
                             .getAdditionalCredentialInformation(credential) : Optional.empty()).orElse(null);
+
             if (queriedCredential != null) {
                 twitchUsername = queriedCredential.getUserName();
                 twitchScopes = queriedCredential.getScopes();
             }
+
             // Build the TwitchClient for sending messages (so they can be seen in-game)
             twitchSender = TwitchClientBuilder.builder()
                     .withDefaultAuthToken(credential)
@@ -723,21 +737,43 @@ public class StreamChatMod {
         Minecraft.getMinecraft().addScheduledTask(new TwitchMessageHandler(this, event));
     }
 
-    private void onTwitchReward(RewardRedeemedEvent event) {
-        StreamUtils.addMessage("" + EnumChatFormatting.AQUA +
-                EnumChatFormatting.BOLD + event.getRedemption().getUser().getDisplayName() + EnumChatFormatting.DARK_GREEN +
-                " redeemed reward " + EnumChatFormatting.AQUA + EnumChatFormatting.BOLD +
-                event.getRedemption().getReward().getTitle() + EnumChatFormatting.DARK_GREEN + "!");
+    private void onTwitchRaid(RaidEvent event){
+        StreamUtils.queueAddPrefixedMessage(config , "" +
+                EnumChatFormatting.GREEN + event.getRaider() + " is raiding your channel with " +
+                EnumChatFormatting.GOLD + event.getViewers() + " viewers");
+    }
 
-        System.out.println("" + EnumChatFormatting.AQUA +
-                EnumChatFormatting.BOLD + event.getRedemption().getUser().getDisplayName() + EnumChatFormatting.DARK_GREEN +
-                " redeemed reward " + EnumChatFormatting.AQUA + EnumChatFormatting.BOLD +
-                event.getRedemption().getReward().getTitle() + EnumChatFormatting.DARK_GREEN + "!");
+    private void onTwitchHost(InboundHostEvent event){
+        StreamUtils.queueAddPrefixedMessage(config , "" +
+                EnumChatFormatting.GREEN + event.getHosterName() + " is hosting your channel");
+    }
+
+    private void onTwitchReward(ChannelPointsRedemptionEvent event) {
+        StreamUtils.queueAddPrefixedMessage(config , "" +
+                EnumChatFormatting.GREEN + event.getRedemption().getUser().getDisplayName() + " redeemed " +
+                EnumChatFormatting.GOLD + event.getRedemption().getReward().getTitle());
+        StreamUtils.playSound("mob.cat.meow", (float) config.eventSoundVolume.getDouble(), 1.25f);
+    }
+
+    private void onTwitchSub(ChannelSubscribeEvent event){
+        StreamUtils.queueAddPrefixedMessage(config , "" +
+                EnumChatFormatting.GREEN + event.getData().getDisplayName() + " subscribed with a " +
+                EnumChatFormatting.GOLD + event.getData().getSubPlan().ordinalName());
+        StreamUtils.playSound("mob.cat.meow", (float) config.eventSoundVolume.getDouble(), 1.25f);
+    }
+
+    private void onTwitchCheer(ChannelBitsEvent event){
+        StreamUtils.queueAddPrefixedMessage(config , "" +
+                EnumChatFormatting.GREEN + event.getData().getUserName() + " cheered with " +
+                EnumChatFormatting.GOLD + event.getData().getBitsUsed() + "bits! Total amount is: " +
+                event.getData().getTotalBitsUsed() + " bits!");
+        StreamUtils.playSound("mob.cat.meow", (float) config.eventSoundVolume.getDouble(), 1.25f);
     }
 
     private void onTwitchFollow(FollowEvent event) {
-        boolean showChannel = config.forceShowChannelName.getBoolean() || (twitch != null && twitch.getChat().getChannels().size() > 1);
-        StreamUtils.queueAddPrefixedMessage(config, "" + EnumChatFormatting.AQUA + EnumChatFormatting.BOLD + event.getUser().getName() + EnumChatFormatting.DARK_GREEN + " is now following " + EnumChatFormatting.AQUA + EnumChatFormatting.BOLD + event.getChannel().getName() + EnumChatFormatting.DARK_GREEN + "!", showChannel ? event.getChannel().getName() : null);
+        StreamUtils.queueAddPrefixedMessage(config, "" +
+                EnumChatFormatting.GREEN + event.getUser().getName() +
+                EnumChatFormatting.GREEN + " is now following " + event.getChannel().getName());
         if (this.config.playSoundOnFollow.getBoolean()) new Thread(new TwitchFollowSoundScheduler(this)).start();
     }
 
@@ -861,7 +897,9 @@ public class StreamChatMod {
     }
 
     public void checkScopes() {
-        if (twitchScopes != null && !twitchScopes.containsAll(Arrays.asList("chat:read", "chat:edit", "channel:moderate", "channel:manage:broadcast", "user:edit:broadcast", "clips:edit")))
+        if (twitchScopes != null && !twitchScopes.containsAll(Arrays.asList("channel:read:subscriptions", "channel:read:redemptions", "chat:read", "chat:edit",
+                "channel:moderate", "channel:manage:broadcast",
+                "user:edit:broadcast", "clips:edit", "bits:read")))
             StreamUtils.queueAddMessage(EnumChatFormatting.RED + "Warning: Your current token seems to be missing some required scopes. Please regenerate your token using " + EnumChatFormatting.GRAY + "/twitch token");
     }
 

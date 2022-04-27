@@ -410,10 +410,6 @@ public class StreamEmotes {
     }
 
     public void syncAllChannelEmotes(ProgressManager.ProgressBar progress, List<String> channelIds) {
-        // Twitch Emotes
-        if (progress != null) progress.step("Twitch channel emotes");
-        File twitchChannelDir = new File("streamchatmod/emotes/twitch_channel");
-
         // BTTV
         if (progress != null) progress.step("BetterTTV channel emotes");
         File bttvChannelDir = new File("streamchatmod/emotes/bttv_channel");
