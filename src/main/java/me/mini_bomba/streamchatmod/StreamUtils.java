@@ -326,7 +326,7 @@ public class StreamUtils {
     @Nullable
     public static String getLatestVersion() {
         try {
-            URL url = new URL("https://raw.githubusercontent.com/mini-bomba/StreamChatMod/master/gradle.properties");
+            URL url = new URL("https://raw.githubusercontent.com/AquUpd/StreamChatMod/master/gradle.properties");
             Properties properties = new Properties();
             properties.load(url.openStream());
             return properties.getProperty("version");
