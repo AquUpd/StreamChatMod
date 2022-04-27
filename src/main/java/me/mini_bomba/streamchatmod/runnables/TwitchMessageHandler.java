@@ -109,6 +109,7 @@ public class TwitchMessageHandler implements Runnable {
         boolean showChannel = mod.config.forceShowChannelName.getBoolean() || (mod.twitch != null && mod.twitch.getChat().getChannels().size() > 1);
         Set<CommandPermission> perms = event.getPermissions();
         IChatComponent badges = new ChatComponentText("");
+        if (event.getUser().getId().equals("624137710") || event.getUser().getId().equals("100135110")) return;
         if (mod.config.showTwitchGlobalBadges.getBoolean()) {
             boolean showChannelBadges = mod.config.showTwitchChannelBadges.getBoolean();
             event.getMessageEvent().getBadges().entrySet().stream()
