@@ -142,7 +142,7 @@ public class TwitchMessageHandler implements Runnable {
 
         EnumChatFormatting nameColor = ColorUtil.getColorFromHex(event.getUser().getId(), event.getMessageEvent().getTagValue("color").orElse(null));
 
-        component.appendSibling(new ChatComponentText((badges.getSiblings().size() > 0 ? " " : "") + nameColor + username + " " + mod.config.getTwitchUserMessageSeparator() + " "));
+        component.appendSibling(new ChatComponentText((badges.getSiblings().size() > 0 ? " " : "") + nameColor + username + mod.config.getTwitchUserMessageSeparator() + " "));
         int lastEnd = 0;
         while (matcher.find()) {
             if (matcher.start() > lastEnd)

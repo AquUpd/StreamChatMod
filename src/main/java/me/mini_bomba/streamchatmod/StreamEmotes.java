@@ -410,6 +410,10 @@ public class StreamEmotes {
     }
 
     public void syncAllChannelEmotes(ProgressManager.ProgressBar progress, List<String> channelIds) {
+        // Twitch Emotes
+        if (progress != null) progress.step("Twitch channel emotes");
+        File twitchChannelDir = new File("streamchatmod/emotes/twitch_channel");
+
         // BTTV
         if (progress != null) progress.step("BetterTTV channel emotes");
         File bttvChannelDir = new File("streamchatmod/emotes/bttv_channel");
@@ -497,12 +501,12 @@ public class StreamEmotes {
                     LOGGER.warn("Duplicate emote name for channel " + channelId + ": " + emote.name);
                 else if (!bttvEmotes.containsKey(emote.id)) LOGGER.warn("Missing BTTV emote with id " + emote.id);
                 else wrappedChannelEmotes.put(emote.name, bttvEmotes.get(emote.id));
-            for (FFZEmote emote : ffzChannels.get(channelId))
-                if (wrappedChannelEmotes.containsKey(emote.name))
-                    LOGGER.warn("Duplicate emote name for channel " + channelId + ": " + emote.name);
-                else if (!ffzEmotes.containsKey(String.valueOf(emote.id)))
-                    LOGGER.warn("Missing FFZ emote with id " + emote.id);
-                else wrappedChannelEmotes.put(emote.name, ffzEmotes.get(String.valueOf(emote.id)));
+//            for (FFZEmote emote : ffzChannels.get(channelId))
+//                if (wrappedChannelEmotes.containsKey(emote.name))
+//                    LOGGER.warn("Duplicate emote name for channel " + channelId + ": " + emote.name);
+//                else if (!ffzEmotes.containsKey(String.valueOf(emote.id)))
+//                    LOGGER.warn("Missing FFZ emote with id " + emote.id);
+//                else wrappedChannelEmotes.put(emote.name, ffzEmotes.get(String.valueOf(emote.id)));
             channelEmotes.put(channelId, wrappedChannelEmotes);
         }
     }

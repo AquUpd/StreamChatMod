@@ -11,7 +11,10 @@ import com.github.twitch4j.auth.providers.TwitchIdentityProvider;
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.enums.NoticeTag;
 import com.github.twitch4j.chat.events.channel.*;
+import com.github.twitch4j.eventsub.events.ChannelPointsCustomRewardRedemptionEvent;
 import com.github.twitch4j.helix.domain.*;
+import com.github.twitch4j.pubsub.events.ChannelPointsRedemptionEvent;
+import com.github.twitch4j.pubsub.events.RewardRedeemedEvent;
 import com.github.twitch4j.tmi.domain.Chatters;
 import com.sun.net.httpserver.HttpServer;
 import lombok.Getter;
@@ -654,6 +657,7 @@ public class StreamChatMod {
                     .withCredentialManager(twitchCredentialManager)
                     .withDefaultAuthToken(credential)
                     .withEnableChat(true)
+                    .withEnablePubSub(true)
                     .withChatAccount(credential)
                     .withEnableHelix(true)
                     .withEnableTMI(true)
@@ -669,9 +673,12 @@ public class StreamChatMod {
                 StreamUtils.queueAddMessage(EnumChatFormatting.GRAY + "Synchronising channel emote cache...");
                 emotes.syncAllChannelEmotes(null, channelIds);
             }
+
+            twitch.getPubSub().listenForChannelPointsRedemptionEvents(credential, "itsnekoli");
             twitch.getEventManager().onEvent(ChannelMessageEvent.class, this::onTwitchMessage);
             twitch.getEventManager().onEvent(FollowEvent.class, this::onTwitchFollow);
             twitch.getEventManager().onEvent(ChannelNoticeEvent.class, this::onTwitchNotice);
+            twitch.getEventManager().onEvent(RewardRedeemedEvent.class, this::onTwitchReward);
             twitch.getEventManager().onEvent(DeleteMessageEvent.class, this::onTwitchMessageDeleted);
             twitch.getEventManager().onEvent(ClearChatEvent.class, this::onTwitchChatClear);
             twitch.getEventManager().onEvent(UserTimeoutEvent.class, this::onUserTimedOut);
@@ -687,7 +694,9 @@ public class StreamChatMod {
             }
             if (config.followEventEnabled.getBoolean()) twitch.getClientHelper().enableFollowEventListener(channels);
             // Get username & scopes
-            OAuth2Credential queriedCredential = twitchCredentialManager.getIdentityProviderByName("twitch").flatMap(provider -> provider instanceof TwitchIdentityProvider ? ((TwitchIdentityProvider) provider).getAdditionalCredentialInformation(credential) : Optional.empty()).orElse(null);
+            OAuth2Credential queriedCredential = twitchCredentialManager.getIdentityProviderByName("twitch")
+                    .flatMap(provider -> provider instanceof TwitchIdentityProvider ? ((TwitchIdentityProvider) provider)
+                            .getAdditionalCredentialInformation(credential) : Optional.empty()).orElse(null);
             if (queriedCredential != null) {
                 twitchUsername = queriedCredential.getUserName();
                 twitchScopes = queriedCredential.getScopes();
@@ -712,6 +721,18 @@ public class StreamChatMod {
 
     private void onTwitchMessage(ChannelMessageEvent event) {
         Minecraft.getMinecraft().addScheduledTask(new TwitchMessageHandler(this, event));
+    }
+
+    private void onTwitchReward(RewardRedeemedEvent event) {
+        StreamUtils.addMessage("" + EnumChatFormatting.AQUA +
+                EnumChatFormatting.BOLD + event.getRedemption().getUser().getDisplayName() + EnumChatFormatting.DARK_GREEN +
+                " redeemed reward " + EnumChatFormatting.AQUA + EnumChatFormatting.BOLD +
+                event.getRedemption().getReward().getTitle() + EnumChatFormatting.DARK_GREEN + "!");
+
+        System.out.println("" + EnumChatFormatting.AQUA +
+                EnumChatFormatting.BOLD + event.getRedemption().getUser().getDisplayName() + EnumChatFormatting.DARK_GREEN +
+                " redeemed reward " + EnumChatFormatting.AQUA + EnumChatFormatting.BOLD +
+                event.getRedemption().getReward().getTitle() + EnumChatFormatting.DARK_GREEN + "!");
     }
 
     private void onTwitchFollow(FollowEvent event) {
