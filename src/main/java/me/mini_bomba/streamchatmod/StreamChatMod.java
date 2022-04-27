@@ -732,6 +732,7 @@ public class StreamChatMod {
             return false;
         }
     }
+    
 
     private void onTwitchMessage(ChannelMessageEvent event) {
         Minecraft.getMinecraft().addScheduledTask(new TwitchMessageHandler(this, event));
