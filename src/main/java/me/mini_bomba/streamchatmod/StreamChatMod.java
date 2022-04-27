@@ -250,6 +250,8 @@ public class StreamChatMod {
     public void stop(FMLModDisabledEvent event) {
         stopUpdateChecker();
         stopTwitch();
+        twitch.getPubSub().close();
+
         config.saveIfChanged();
         asyncExecutor.shutdown();
         boolean terminated = false;
@@ -732,7 +734,7 @@ public class StreamChatMod {
             return false;
         }
     }
-    
+
 
     private void onTwitchMessage(ChannelMessageEvent event) {
         Minecraft.getMinecraft().addScheduledTask(new TwitchMessageHandler(this, event));
