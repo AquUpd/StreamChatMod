@@ -234,7 +234,7 @@ public class StreamChatMod {
         metadata.name = MODNAME;
         metadata.authorList = Collections.singletonList("mini_bomba");
         metadata.description = "A Chat client for Twitch in minecraft because yes";
-        metadata.url = "https://github.com/mini-bomba/StreamChatMod";
+        metadata.url = "https://github.com/AquUpd/StreamChatMod";
         if (PRERELEASE) {
             metadata.version = GIT_HASH;
             metadata.description += "\n\nYou are running SCM prerelease built from git commit " + GIT_HASH;
@@ -285,7 +285,7 @@ public class StreamChatMod {
             if (PRERELEASE && newLatestCommit != null)
                 component2 = StreamUtils.createPrefixedComponent(config, EnumChatFormatting.GRAY + "Update commit message: " + EnumChatFormatting.AQUA + newLatestCommit.shortMessage);
             IChatComponent component3 = StreamUtils.createPrefixedComponent(config, "" + EnumChatFormatting.GRAY + EnumChatFormatting.ITALIC + "Want to check for updates only on startup? Click here!");
-            ChatStyle style = new ChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/mini-bomba/StreamChatMod/releases"))
+            ChatStyle style = new ChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/AquUpd/StreamChatMod/releases"))
                     .setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ChatComponentText(EnumChatFormatting.GREEN + "Click here to see mod releases on GitHub!")));
             component1.setChatStyle(style);
             if (component2 != null) component2.setChatStyle(style);
@@ -849,7 +849,7 @@ public class StreamChatMod {
             IChatComponent cc = new ChatComponentText(EnumChatFormatting.GRAY + "Please report this to StreamChatMod's repository as an issue, so a fallback message can be created");
             ChatStyle style = new ChatStyle();
             style.setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ChatComponentText(EnumChatFormatting.GREEN + "Click to open the issues page")));
-            style.setChatClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/mini-bomba/StreamChatMod/issues"));
+            style.setChatClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/AquUpd/StreamChatMod/issues"));
             cc.setChatStyle(style);
             StreamUtils.queueAddMessage(cc);
         }
@@ -865,13 +865,13 @@ public class StreamChatMod {
         IChatComponent commitMessage = null;
         if (latestVersion != null && !latestVersion.equals(VERSION) || (PRERELEASE && latestCommit != null && !latestCommit.shortHash.equals(GIT_HASH))) {
             IChatComponent changelog = new ChatComponentText(EnumChatFormatting.GRAY + " (" + EnumChatFormatting.YELLOW + "View Changes" + EnumChatFormatting.GRAY + ")");
-            ChatStyle changelogStyle = new ChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/mini-bomba/StreamChatMod/compare/" + (PRERELEASE ? GIT_HASH : "v" + VERSION) + ".." + (PRERELEASE ? "latest" : "v" + latestVersion)));
+            ChatStyle changelogStyle = new ChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/AquUpd/StreamChatMod/compare/" + (PRERELEASE ? GIT_HASH : "v" + VERSION) + ".." + (PRERELEASE ? "latest" : "v" + latestVersion)));
             changelogStyle.setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ChatComponentText(EnumChatFormatting.GREEN + "Click here to view changes between your current & the latest version")));
             changelog.setChatStyle(changelogStyle);
             component.appendSibling(changelog);
             if (PRERELEASE && latestCommit != null)
                 commitMessage = new ChatComponentText(prefix + EnumChatFormatting.GRAY + "Latest commit message: " + EnumChatFormatting.AQUA + latestCommit.shortMessage);
-            ChatStyle style = new ChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/mini-bomba/StreamChatMod/releases"));
+            ChatStyle style = new ChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/AquUpd/StreamChatMod/releases"));
             style.setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ChatComponentText(EnumChatFormatting.GREEN + "Click here to see mod releases on GitHub!")));
             component.setChatStyle(style);
             if (commitMessage != null) commitMessage.setChatStyle(style);
