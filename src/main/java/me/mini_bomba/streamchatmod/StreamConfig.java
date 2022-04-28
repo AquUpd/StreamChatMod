@@ -71,7 +71,7 @@ public class StreamConfig {
         // twitch
         twitchEnabled = config.get("twitch", "enabled", false);
         twitchChannels = config.get("twitch", "channels", new String[0]);
-        twitchBlacklistedChannels = config.get("twitch", "channels", new String[0]);
+        twitchBlacklistedChannels = config.get("twitch", "blacklistedchannels", new String[0]);
         twitchSelectedChannel = config.get("twitch", "selectedChannel", "");
         twitchMessageRedirectEnabled = config.get("twitch", "messageRedirectEnabled", false);
         twitchPrefix = config.get("twitch", "prefix", "&5[TWITCH");
