@@ -572,7 +572,7 @@ public class StreamChatMod {
 
             String channel = this.config.twitchSelectedChannel.getString();
             if (channel.length() != 0) this.twitchSender.getChat().sendMessage(channel, clip.getUrl());
-            
+
             if (copyToClipboard) GuiScreen.setClipboardString(clip.getUrl());
         } catch (Exception e) {
             lastClipCreated = System.currentTimeMillis() - 60 * 1000; // Set cooldown to 1 minute instead of 2 minutes
@@ -768,16 +768,16 @@ public class StreamChatMod {
         String subtier = "";
         switch (event.getData().getTier().ordinalName()){
             case "1000":
-                subtier = "Tier 1";
+                subtier = "(Tier 1)";
                 break;
             case "2000":
-                subtier = "Tier 2";
+                subtier = "(Tier 2)";
                 break;
             case "3000":
-                subtier = "Tier 3";
+                subtier = "(Tier 3)";
                 break;
             case "Prime":
-                subtier = "Prime";
+                subtier = "(Prime)";
         }
 
         String sender;
@@ -788,23 +788,23 @@ public class StreamChatMod {
         }
         StreamUtils.queueAddPrefixedMessage(config , "" +
                 EnumChatFormatting.GREEN + sender + " is gifting " +
-                EnumChatFormatting.GOLD + event.getData().getCount() + " " + subtier + " Subs");
+                EnumChatFormatting.GOLD + event.getData().getCount() + " subs " + subtier);
     }
 
     private void onTwitchSub(ChannelSubscribeEvent event){
         String subtier = "";
         switch (event.getData().getSubPlan().ordinalName()){
             case "1000":
-                subtier = "Tier 1";
+                subtier = "(Tier 1)";
                 break;
             case "2000":
-                subtier = "Tier 2";
+                subtier = "(Tier 2)";
                 break;
             case "3000":
-                subtier = "Tier 3";
+                subtier = "(Tier 3)";
                 break;
             case "Prime":
-                subtier = "Prime";
+                subtier = "(Prime)";
         }
 
         if (event.getData().getIsGift()) {
@@ -816,9 +816,9 @@ public class StreamChatMod {
             }
 
             StreamUtils.queueAddPrefixedMessage(config , "" +
-                    EnumChatFormatting.GREEN + sender + " gifted a " +
+                    EnumChatFormatting.GREEN + sender + " gifted a sub " +
                     EnumChatFormatting.GOLD + subtier +
-                    EnumChatFormatting.GREEN + " Sub to " + event.getData().getChannelName());
+                    EnumChatFormatting.GREEN + " to " + event.getData().getChannelName());
         } else {
             String monStreak = ".";
             if(!(event.getData().getStreakMonths() == null) || !(event.getData().getCumulativeMonths() == 1)){
@@ -828,7 +828,7 @@ public class StreamChatMod {
             }
 
             StreamUtils.queueAddPrefixedMessage(config , "" +
-                    EnumChatFormatting.GREEN + event.getData().getChannelName() + " subscribed at " +
+                    EnumChatFormatting.GREEN + event.getData().getChannelName() + " just subscribed " +
                     EnumChatFormatting.GOLD + subtier +
                     EnumChatFormatting.GREEN + ". They subscribed for " +
                     EnumChatFormatting.GOLD + event.getData().getCumulativeMonths() + " months" +
