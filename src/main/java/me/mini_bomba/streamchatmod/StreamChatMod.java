@@ -26,6 +26,7 @@ import me.mini_bomba.streamchatmod.runnables.TwitchMessageHandler;
 import me.mini_bomba.streamchatmod.utils.ColorUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.command.CommandException;
 import net.minecraft.event.ClickEvent;
 import net.minecraft.event.HoverEvent;
 import net.minecraft.util.ChatComponentText;
@@ -568,6 +569,10 @@ public class StreamChatMod {
             clipComponent.setChatStyle(style);
             mainComponent.appendSibling(clipComponent);
             StreamUtils.queueAddMessage(mainComponent);
+
+            String channel = this.config.twitchSelectedChannel.getString();
+            if (channel.length() != 0) this.twitchSender.getChat().sendMessage(channel, clip.getUrl());
+            
             if (copyToClipboard) GuiScreen.setClipboardString(clip.getUrl());
         } catch (Exception e) {
             lastClipCreated = System.currentTimeMillis() - 60 * 1000; // Set cooldown to 1 minute instead of 2 minutes
@@ -686,6 +691,7 @@ public class StreamChatMod {
             twitch.getEventManager().onEvent(ChannelPointsRedemptionEvent.class, this::onTwitchReward);
             twitch.getEventManager().onEvent(ChannelSubscribeEvent.class, this::onTwitchSub);
             twitch.getEventManager().onEvent(ChannelBitsEvent.class, this::onTwitchCheer);
+            twitch.getEventManager().onEvent(ChannelSubGiftEvent.class, this::onMultiTwitchSub);
 
             twitch.getEventManager().onEvent(ChannelMessageEvent.class, this::onTwitchMessage);
             twitch.getEventManager().onEvent(FollowEvent.class, this::onTwitchFollow);
@@ -758,18 +764,87 @@ public class StreamChatMod {
         StreamUtils.playSound("mob.cat.meow", (float) config.eventSoundVolume.getDouble(), 1.25f);
     }
 
-    private void onTwitchSub(ChannelSubscribeEvent event){
+    private void onMultiTwitchSub(ChannelSubGiftEvent event){
+        String subtier = "";
+        switch (event.getData().getTier().ordinalName()){
+            case "1000":
+                subtier = "Tier 1";
+                break;
+            case "2000":
+                subtier = "Tier 2";
+                break;
+            case "3000":
+                subtier = "Tier 3";
+                break;
+            case "Prime":
+                subtier = "Prime";
+        }
+
+        String sender;
+        if(event.getData().getDisplayName() != null){
+            sender = event.getData().getDisplayName();
+        } else {
+            sender = "Anonymous";
+        }
         StreamUtils.queueAddPrefixedMessage(config , "" +
-                EnumChatFormatting.GREEN + event.getData().getDisplayName() + " subscribed with a " +
-                EnumChatFormatting.GOLD + event.getData().getSubPlan().ordinalName());
+                EnumChatFormatting.GREEN + sender + " is gifting " +
+                EnumChatFormatting.GOLD + event.getData().getCount() + " " + subtier + " Subs");
+    }
+
+    private void onTwitchSub(ChannelSubscribeEvent event){
+        String subtier = "";
+        switch (event.getData().getSubPlan().ordinalName()){
+            case "1000":
+                subtier = "Tier 1";
+                break;
+            case "2000":
+                subtier = "Tier 2";
+                break;
+            case "3000":
+                subtier = "Tier 3";
+                break;
+            case "Prime":
+                subtier = "Prime";
+        }
+
+        if (event.getData().getIsGift()) {
+            String sender;
+            if(event.getData().getDisplayName() != null){
+                sender = event.getData().getDisplayName();
+            } else {
+                sender = "Anonymous";
+            }
+
+            StreamUtils.queueAddPrefixedMessage(config , "" +
+                    EnumChatFormatting.GREEN + sender + " gifted a " +
+                    EnumChatFormatting.GOLD + subtier +
+                    EnumChatFormatting.GREEN + " Sub to " + event.getData().getChannelName());
+        } else {
+            String monStreak = ".";
+            if(!(event.getData().getStreakMonths() == null) || !(event.getData().getCumulativeMonths() == 1)){
+                monStreak = ", currently on a " +
+                        EnumChatFormatting.GOLD + event.getData().getCumulativeMonths() + " months" +
+                        EnumChatFormatting.GREEN + " streak!";
+            }
+
+            StreamUtils.queueAddPrefixedMessage(config , "" +
+                    EnumChatFormatting.GREEN + event.getData().getChannelName() + " subscribed at " +
+                    EnumChatFormatting.GOLD + subtier +
+                    EnumChatFormatting.GREEN + ". They subscribed for " +
+                    EnumChatFormatting.GOLD + event.getData().getCumulativeMonths() + " months" +
+                    EnumChatFormatting.GREEN + monStreak);
+        }
+
         StreamUtils.playSound("mob.cat.meow", (float) config.eventSoundVolume.getDouble(), 1.25f);
     }
 
     private void onTwitchCheer(ChannelBitsEvent event){
         StreamUtils.queueAddPrefixedMessage(config , "" +
                 EnumChatFormatting.GREEN + event.getData().getUserName() + " cheered with " +
-                EnumChatFormatting.GOLD + event.getData().getBitsUsed() + "bits! Total amount is: " +
-                event.getData().getTotalBitsUsed() + " bits!");
+                EnumChatFormatting.GOLD + event.getData().getBitsUsed() +
+                EnumChatFormatting.GREEN + " bits! Total amount is: " +
+                EnumChatFormatting.GOLD + event.getData().getTotalBitsUsed() +
+                EnumChatFormatting.GREEN + " bits");
         StreamUtils.playSound("mob.cat.meow", (float) config.eventSoundVolume.getDouble(), 1.25f);
     }
 
