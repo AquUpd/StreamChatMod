@@ -28,6 +28,7 @@ public class StreamConfig {
     // twitch
     public final Property twitchEnabled;
     public final Property twitchChannels;
+    public final Property twitchBlacklistedChannels;
     public final Property twitchSelectedChannel;
     public final Property twitchMessageRedirectEnabled;
     public final Property twitchPrefix;
@@ -64,11 +65,13 @@ public class StreamConfig {
         minecraftChatPrefix = config.get("common", "minecraftChatPrefix", "!!");
         allowMessageDeletion = config.get("common", "allowMessageDeletion", true);
         showEmotesEverywhere = config.get("common", "showEmotesEverywhere", false);
+
         // tokens
         twitchToken = config.get("tokens", "twitch", "");
         // twitch
         twitchEnabled = config.get("twitch", "enabled", false);
         twitchChannels = config.get("twitch", "channels", new String[0]);
+        twitchBlacklistedChannels = config.get("twitch", "channels", new String[0]);
         twitchSelectedChannel = config.get("twitch", "selectedChannel", "");
         twitchMessageRedirectEnabled = config.get("twitch", "messageRedirectEnabled", false);
         twitchPrefix = config.get("twitch", "prefix", "&5[TWITCH");

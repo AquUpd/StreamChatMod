@@ -821,7 +821,7 @@ public class StreamChatMod {
                     EnumChatFormatting.GREEN + " to " + event.getData().getChannelName());
         } else {
             String monStreak = ".";
-            if(!(event.getData().getStreakMonths() == null) || !(event.getData().getCumulativeMonths() == 1)){
+            if(!(event.getData().getStreakMonths() == null) && !(event.getData().getCumulativeMonths() <= 1)){
                 monStreak = ", currently on a " +
                         EnumChatFormatting.GOLD + event.getData().getCumulativeMonths() + " months" +
                         EnumChatFormatting.GREEN + " streak!";
