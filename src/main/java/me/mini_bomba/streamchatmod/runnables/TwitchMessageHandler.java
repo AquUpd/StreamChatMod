@@ -111,7 +111,7 @@ public class TwitchMessageHandler implements Runnable {
         IChatComponent badges = new ChatComponentText("");
 
         List<String> removeChannels = Arrays.asList(mod.config.twitchBlacklistedChannels.getStringList());
-        if (removeChannels.contains(event.getUser().getName())) return;
+        //if (removeChannels.contains(event.getUser().getName())) return;
         if (event.getUser().getId().equals("624137710") || event.getUser().getId().equals("100135110")) return;
 
         if (mod.config.showTwitchGlobalBadges.getBoolean()) {
