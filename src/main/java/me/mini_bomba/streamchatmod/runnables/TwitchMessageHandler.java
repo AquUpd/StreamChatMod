@@ -21,6 +21,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -106,13 +107,19 @@ public class TwitchMessageHandler implements Runnable {
 
     @Override
     public void run() {
+        String[] removeChannels = mod.config.twitchBlacklistedChannels.getStringList();
+        for (String s: removeChannels) {
+            String a = s.toLowerCase(Locale.US);
+            String b = event.getUser().getName().toLowerCase(Locale.US);
+
+            if(Objects.equals(a, b)) return;
+        }
+
+        //if (event.getUser().getId().equals("624137710") || event.getUser().getId().equals("100135110")) return;
+
         boolean showChannel = mod.config.forceShowChannelName.getBoolean() || (mod.twitch != null && mod.twitch.getChat().getChannels().size() > 1);
         Set<CommandPermission> perms = event.getPermissions();
         IChatComponent badges = new ChatComponentText("");
-
-        List<String> removeChannels = Arrays.asList(mod.config.twitchBlacklistedChannels.getStringList());
-        //if (removeChannels.contains(event.getUser().getName())) return;
-        if (event.getUser().getId().equals("624137710") || event.getUser().getId().equals("100135110")) return;
 
         if (mod.config.showTwitchGlobalBadges.getBoolean()) {
             boolean showChannelBadges = mod.config.showTwitchChannelBadges.getBoolean();
