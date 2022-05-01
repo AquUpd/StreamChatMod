@@ -89,6 +89,8 @@ public class StreamChatMod {
     public Thread httpShutdownScheduler = null;
     public int loginMessageTimer = -1;
 
+    public boolean sentStatus = false;
+
     // Executor for async actions
     private ScheduledThreadPoolExecutor asyncExecutor;
 
@@ -711,7 +713,6 @@ public class StreamChatMod {
             for (String channel : channels) {
                 chat.joinChannel(channel);
             }
-
             if (config.followEventEnabled.getBoolean()) twitch.getClientHelper().enableFollowEventListener(channels);
             // Get username & scopes
             OAuth2Credential queriedCredential = twitchCredentialManager.getIdentityProviderByName("twitch")
@@ -722,7 +723,6 @@ public class StreamChatMod {
                 twitchUsername = queriedCredential.getUserName();
                 twitchScopes = queriedCredential.getScopes();
             }
-
             // Build the TwitchClient for sending messages (so they can be seen in-game)
             twitchSender = TwitchClientBuilder.builder()
                     .withDefaultAuthToken(credential)

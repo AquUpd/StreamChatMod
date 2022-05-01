@@ -43,8 +43,9 @@ public class StreamEvents {
 
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event){
-        if (mod.loginMessageTimer == 0) {
+        if (mod.loginMessageTimer == 0 && !mod.sentStatus) {
             mod.printTwitchStatus(true);
+            mod.sentStatus = true;
         }
         if (mod.loginMessageTimer >= 0) mod.loginMessageTimer--;
     }

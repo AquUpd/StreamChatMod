@@ -192,7 +192,10 @@ public class TwitchMessageHandler implements Runnable {
         ChatStyle style = new ChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/twitch delete " + event.getChannel().getName() + " " + event.getMessageEvent().getMessageId().orElse("")));
         component.setChatStyle(style);
         StreamUtils.addMessage(component);
+
+        if (mod.getTwitchUsername() != null && event.getMessage().toLowerCase(Locale.US).contains(mod.getTwitchUsername())) StreamUtils.playSound("note.pling", (float) mod.config.messageSoundVolume.getDouble(), 1.25f);
         if (mod.config.playSoundOnMessage.getBoolean()) StreamUtils.playSound("note.pling", (float) mod.config.messageSoundVolume.getDouble(), 1.25f);
+
         if (!clips.isEmpty())
             new Thread(new ClipLookupTask(clips)).start();
     }
