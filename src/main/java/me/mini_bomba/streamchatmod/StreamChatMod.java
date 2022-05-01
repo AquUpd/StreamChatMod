@@ -748,7 +748,7 @@ public class StreamChatMod {
 
     private void onTwitchRaid(RaidEvent event){
         StreamUtils.queueAddPrefixedMessage(config , "" +
-                EnumChatFormatting.GREEN + event.getRaider() + " is raiding your channel with " +
+                EnumChatFormatting.GREEN + event.getRaider().getName() + " is raiding your channel with " +
                 EnumChatFormatting.GOLD + event.getViewers() + " viewers");
     }
 
