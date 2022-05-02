@@ -11,10 +11,11 @@ import com.github.twitch4j.auth.providers.TwitchIdentityProvider;
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.enums.NoticeTag;
 import com.github.twitch4j.chat.events.channel.*;
-import com.github.twitch4j.eventsub.events.ChannelCheerEvent;
-import com.github.twitch4j.eventsub.events.ChannelPointsCustomRewardRedemptionEvent;
 import com.github.twitch4j.helix.domain.*;
-import com.github.twitch4j.pubsub.events.*;
+import com.github.twitch4j.pubsub.events.ChannelBitsEvent;
+import com.github.twitch4j.pubsub.events.ChannelPointsRedemptionEvent;
+import com.github.twitch4j.pubsub.events.ChannelSubGiftEvent;
+import com.github.twitch4j.pubsub.events.ChannelSubscribeEvent;
 import com.github.twitch4j.tmi.domain.Chatters;
 import com.sun.net.httpserver.HttpServer;
 import lombok.Getter;
@@ -23,10 +24,8 @@ import me.mini_bomba.streamchatmod.commands.TwitchChatCommand;
 import me.mini_bomba.streamchatmod.commands.TwitchCommand;
 import me.mini_bomba.streamchatmod.runnables.TwitchFollowSoundScheduler;
 import me.mini_bomba.streamchatmod.runnables.TwitchMessageHandler;
-import me.mini_bomba.streamchatmod.utils.ColorUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.command.CommandException;
 import net.minecraft.event.ClickEvent;
 import net.minecraft.event.HoverEvent;
 import net.minecraft.util.ChatComponentText;
@@ -53,8 +52,6 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
-
-import static com.github.twitch4j.pubsub.enums.PubSubType.LISTEN;
 
 @SuppressWarnings({"ConstantConditions", "unused"})
 @Mod(modid = StreamChatMod.MODID, version = StreamChatMod.VERSION, clientSideOnly = true)
@@ -780,12 +777,11 @@ public class StreamChatMod {
                 subtier = "(Prime)";
         }
 
-        String sender;
+        String sender = "Anonymous";
         if(event.getData().getDisplayName() != null){
             sender = event.getData().getDisplayName();
-        } else {
-            sender = "Anonymous";
         }
+
         StreamUtils.queueAddPrefixedMessage(config , "" +
                 EnumChatFormatting.GREEN + sender + " is gifting " +
                 EnumChatFormatting.GOLD + event.getData().getCount() + " subs " + subtier);
@@ -808,17 +804,15 @@ public class StreamChatMod {
         }
 
         if (event.getData().getIsGift()) {
-            String sender;
+            String sender = "Anonymous";
             if(event.getData().getDisplayName() != null){
                 sender = event.getData().getDisplayName();
-            } else {
-                sender = "Anonymous";
             }
 
             StreamUtils.queueAddPrefixedMessage(config , "" +
                     EnumChatFormatting.GREEN + sender + " gifted a sub " +
                     EnumChatFormatting.GOLD + subtier +
-                    EnumChatFormatting.GREEN + " to " + event.getData().getChannelName());
+                    EnumChatFormatting.GREEN + " to " + event.getData().getRecipientDisplayName());
         } else {
             String monStreak = ".";
             if(!(event.getData().getStreakMonths() == null) && !(event.getData().getCumulativeMonths() <= 1)){
@@ -828,7 +822,7 @@ public class StreamChatMod {
             }
 
             StreamUtils.queueAddPrefixedMessage(config , "" +
-                    EnumChatFormatting.GREEN + event.getData().getChannelName() + " just subscribed " +
+                    EnumChatFormatting.GREEN + event.getData().getDisplayName() + " just subscribed " +
                     EnumChatFormatting.GOLD + subtier +
                     EnumChatFormatting.GREEN + ". They subscribed for " +
                     EnumChatFormatting.GOLD + event.getData().getCumulativeMonths() + " months" +
@@ -839,8 +833,13 @@ public class StreamChatMod {
     }
 
     private void onTwitchCheer(ChannelBitsEvent event){
+        String sender = "Anonymous";
+        if(!event.getData().isAnonymous()){
+            sender = event.getData().getUserName();
+        }
+
         StreamUtils.queueAddPrefixedMessage(config , "" +
-                EnumChatFormatting.GREEN + event.getData().getUserName() + " cheered with " +
+                EnumChatFormatting.GREEN + sender + " cheered with " +
                 EnumChatFormatting.GOLD + event.getData().getBitsUsed() +
                 EnumChatFormatting.GREEN + " bits! Total amount is: " +
                 EnumChatFormatting.GOLD + event.getData().getTotalBitsUsed() +
