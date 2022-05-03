@@ -534,8 +534,8 @@ public class StreamChatMod {
     }
 
     private void createClip(String broadcasterId, boolean copyToClipboard, boolean hasDelay) {
-        if (lastClipCreated+(60000*2) > System.currentTimeMillis()) {
-            StreamUtils.queueAddMessage(EnumChatFormatting.RED+"Please wait "+((lastClipCreated+(60000*2))-System.currentTimeMillis())/1000+" seconds before creating another clip.");
+        if (lastClipCreated+(6000*2) > System.currentTimeMillis()) {
+            StreamUtils.queueAddMessage(EnumChatFormatting.RED+"Please wait "+((lastClipCreated+(6000*2))-System.currentTimeMillis())/1000+" seconds before creating another clip.");
             return;
         }
         long lastClipCreatedCopy = lastClipCreated;
