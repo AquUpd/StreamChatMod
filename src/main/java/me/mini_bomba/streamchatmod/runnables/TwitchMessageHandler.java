@@ -143,7 +143,7 @@ public class TwitchMessageHandler implements Runnable {
                 badges.appendSibling(new ChatComponentText(StringUtils.join(badgesTexts, " ")));
         }
         boolean allowFormatting = mod.config.allowFormatting.getBoolean() && (!mod.config.subOnlyFormatting.getBoolean() || perms.stream().anyMatch(p -> p == CommandPermission.SUBSCRIBER || p == CommandPermission.VIP || p == CommandPermission.MODERATOR || p == CommandPermission.TWITCHSTAFF || p == CommandPermission.BROADCASTER));
-        String message = event.getMessage();
+        String message = event.getMessage().replace("\uFE0F", "");
 
         Matcher matcher = urlPattern.matcher(message);
         List<ClipComponentMapping> clips = new ArrayList<>();
