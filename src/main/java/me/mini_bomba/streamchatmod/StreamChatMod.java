@@ -773,7 +773,7 @@ public class StreamChatMod {
         StreamUtils.queueAddPrefixedMessage(config , "" +
                 EnumChatFormatting.GREEN + event.getRedemption().getUser().getDisplayName() + " redeemed " +
                 EnumChatFormatting.GOLD + event.getRedemption().getReward().getTitle());
-        soundtimer = 300;
+        soundtimer = 600;
         //System.out.println(event.getRedemption().toString());
     }
 
