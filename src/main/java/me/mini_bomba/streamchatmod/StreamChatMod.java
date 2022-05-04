@@ -56,8 +56,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import static com.github.twitch4j.eventsub.domain.RedemptionStatus.UNFULFILLED;
-
 @SuppressWarnings({"ConstantConditions", "unused"})
 @Mod(modid = StreamChatMod.MODID, version = StreamChatMod.VERSION, clientSideOnly = true)
 public class StreamChatMod {
@@ -697,6 +695,9 @@ public class StreamChatMod {
                 StreamUtils.queueAddMessage(EnumChatFormatting.GRAY + "Synchronising channel emote cache...");
                 emotes.syncAllChannelEmotes(null, channelIds);
             }
+            //List<Emote> emotelist = twitch.getHelix().getChannelEmotes(token, getTwitchUserByName(config.twitchSelectedChannel.getString()).getId()).execute().getEmotes();
+            //System.out.println(getTwitchUserByName("itsnekoli").getId() + emotelist);
+
             twitch.getPubSub().listenForChannelPointsRedemptionEvents(credential, getTwitchUserByName(config.twitchSelectedChannel.getString()).getId());
             twitch.getPubSub().listenForSubscriptionEvents(credential, getTwitchUserByName(config.twitchSelectedChannel.getString()).getId());
             twitch.getPubSub().listenForCheerEvents(credential, getTwitchUserByName(config.twitchSelectedChannel.getString()).getId());
@@ -769,7 +770,7 @@ public class StreamChatMod {
     }
 
     private void onTwitchReward(ChannelPointsRedemptionEvent event) {
-        //if(Objects.equals(event.getRedemption().getStatus(), "UNFULFILLED")) {}
+        if(Objects.equals(event.getRedemption().getStatus(), "ACTION_TAKEN")) return;
         StreamUtils.queueAddPrefixedMessage(config , "" +
                 EnumChatFormatting.GREEN + event.getRedemption().getUser().getDisplayName() + " redeemed " +
                 EnumChatFormatting.GOLD + event.getRedemption().getReward().getTitle());
