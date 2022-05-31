@@ -43,8 +43,6 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLModDisabledEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -93,7 +91,7 @@ public class StreamChatMod {
 
     // Executor for async actions
     private ScheduledThreadPoolExecutor asyncExecutor;
-    private Integer soundtimer = 0;
+    //private Integer soundtimer = 0;
     // Flag for scheduling actions that may break other actions, such as Twitch client stopping/starting
     private final AtomicBoolean importantActionScheduled = new AtomicBoolean(false);
 
@@ -165,6 +163,7 @@ public class StreamChatMod {
         FMLCommonHandler.instance().bus().register(this);
     }
 
+    /*
     @SubscribeEvent
     public void onPlayerTick(TickEvent.PlayerTickEvent event) {
         if (soundtimer > 0) {
@@ -172,6 +171,7 @@ public class StreamChatMod {
             if(soundtimer == 0) StreamUtils.playSound("mob.cat.meow", (float) config.eventSoundVolume.getDouble(), 1.25f);
         }
     }
+    */
 
     // Loader method for the user caches
     private User fetchUserById(String userId) {
@@ -769,12 +769,21 @@ public class StreamChatMod {
                 EnumChatFormatting.GREEN + event.getHosterName() + " is hosting your channel");
     }
 
+    Timer timer = new Timer("Timer");
+    TimerTask DelayedMeow = new TimerTask() {
+        public void run() {
+            StreamUtils.playSound("mob.cat.meow", (float) config.eventSoundVolume.getDouble(), 1.25f);
+        }
+    };
+
     private void onTwitchReward(ChannelPointsRedemptionEvent event) {
         if(Objects.equals(event.getRedemption().getStatus(), "ACTION_TAKEN")) return;
         StreamUtils.queueAddPrefixedMessage(config , "" +
                 EnumChatFormatting.GREEN + event.getRedemption().getUser().getDisplayName() + " redeemed " +
                 EnumChatFormatting.GOLD + event.getRedemption().getReward().getTitle());
-        soundtimer = 600;
+
+        timer.schedule(DelayedMeow, 3000L);
+        //soundtimer = 600;
         //System.out.println(event.getRedemption().toString());
     }
 
@@ -861,6 +870,7 @@ public class StreamChatMod {
                 EnumChatFormatting.GREEN + " bits! Total amount is: " +
                 EnumChatFormatting.GOLD + event.getData().getTotalBitsUsed() +
                 EnumChatFormatting.GREEN + " bits");
+        StreamUtils.queueAddMessage(EnumChatFormatting.GRAY + event.getData().getChatMessage());
         StreamUtils.playSound("mob.cat.meow", (float) config.eventSoundVolume.getDouble(), 1.25f);
     }
 

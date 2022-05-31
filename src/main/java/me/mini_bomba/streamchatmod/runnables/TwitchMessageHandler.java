@@ -108,11 +108,20 @@ public class TwitchMessageHandler implements Runnable {
     @Override
     public void run() {
         String[] removeChannels = mod.config.twitchBlacklistedChannels.getStringList();
+        String[] removePrefix = mod.config.twitchHiddenPrefix.getStringList();
+
         for (String s: removeChannels) {
             String a = s.toLowerCase(Locale.US);
             String b = event.getUser().getName().toLowerCase(Locale.US);
 
             if(Objects.equals(a, b)) return;
+        }
+
+        for (String s: removePrefix) {
+            String a = s.toLowerCase(Locale.US);
+            String b = event.getMessage().substring(0, 1);
+
+            if(a.equalsIgnoreCase(b)) return;
         }
 
         //if (event.getUser().getId().equals("624137710") || event.getUser().getId().equals("100135110")) return;

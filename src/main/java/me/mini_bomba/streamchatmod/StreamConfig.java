@@ -29,6 +29,7 @@ public class StreamConfig {
     public final Property twitchEnabled;
     public final Property twitchChannels;
     public final Property twitchBlacklistedChannels;
+    public final Property twitchHiddenPrefix;
     public final Property twitchSelectedChannel;
     public final Property twitchMessageRedirectEnabled;
     public final Property twitchPrefix;
@@ -72,6 +73,7 @@ public class StreamConfig {
         twitchEnabled = config.get("twitch", "enabled", false);
         twitchChannels = config.get("twitch", "channels", new String[0]);
         twitchBlacklistedChannels = config.get("twitch", "blacklistedchannels", new String[0]);
+        twitchHiddenPrefix = config.get("twitch", "twitchhiddenprefix", new String[0]);
         twitchSelectedChannel = config.get("twitch", "selectedChannel", "");
         twitchMessageRedirectEnabled = config.get("twitch", "messageRedirectEnabled", false);
         twitchPrefix = config.get("twitch", "prefix", "&5[TWITCH");
