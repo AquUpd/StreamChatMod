@@ -48,9 +48,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -91,7 +89,6 @@ public class StreamChatMod {
 
     // Executor for async actions
     private ScheduledThreadPoolExecutor asyncExecutor;
-    //private Integer soundtimer = 0;
     // Flag for scheduling actions that may break other actions, such as Twitch client stopping/starting
     private final AtomicBoolean importantActionScheduled = new AtomicBoolean(false);
 
@@ -162,16 +159,6 @@ public class StreamChatMod {
                 });
         FMLCommonHandler.instance().bus().register(this);
     }
-
-    /*
-    @SubscribeEvent
-    public void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (soundtimer > 0) {
-            soundtimer--;
-            if(soundtimer == 0) StreamUtils.playSound("mob.cat.meow", (float) config.eventSoundVolume.getDouble(), 1.25f);
-        }
-    }
-    */
 
     // Loader method for the user caches
     private User fetchUserById(String userId) {
@@ -769,12 +756,13 @@ public class StreamChatMod {
                 EnumChatFormatting.GREEN + event.getHosterName() + " is hosting your channel");
     }
 
-    Timer timer = new Timer("Timer");
-    TimerTask DelayedMeow = new TimerTask() {
+    Runnable DelayedMeow = new Runnable() {
+        @Override
         public void run() {
             StreamUtils.playSound("mob.cat.meow", (float) config.eventSoundVolume.getDouble(), 1.25f);
         }
     };
+    ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
 
     private void onTwitchReward(ChannelPointsRedemptionEvent event) {
         if(Objects.equals(event.getRedemption().getStatus(), "ACTION_TAKEN")) return;
@@ -782,9 +770,7 @@ public class StreamChatMod {
                 EnumChatFormatting.GREEN + event.getRedemption().getUser().getDisplayName() + " redeemed " +
                 EnumChatFormatting.GOLD + event.getRedemption().getReward().getTitle());
 
-        timer.schedule(DelayedMeow, 3000L);
-        //soundtimer = 600;
-        //System.out.println(event.getRedemption().toString());
+        timer.schedule(DelayedMeow, 5, TimeUnit.SECONDS);
     }
 
     private void onMultiTwitchSub(ChannelSubGiftEvent event){
