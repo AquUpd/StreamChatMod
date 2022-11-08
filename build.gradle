@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'com.github.Debuggingss' name 'ForgeGradle' version '1d22621a6b'
+    id 'com.github.Debuggingss.ForgeGradle' version '1d22621a6b'
     id 'com.github.johnrengelman.shadow' version '6.1.0'
     id "io.freefair.lombok" version "6.0.0-m2"
 }
