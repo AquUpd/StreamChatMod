@@ -118,11 +118,15 @@ public abstract class StreamEmote {
     public ResourceLocation getCurrentFrame(boolean allowAnimated) {
         if (!animated || !allowAnimated)
             return frames.get(0);
+        try {
         long animationTime = System.currentTimeMillis() % animationDuration;
         for (int i = 0; i < Math.min(frames.size(), frameTimes.size()); i++)
             if (frameTimes.get(i) > animationTime)
                 return frames.get(i - 1);
         return frames.get(frames.size() - 1);
+        } catch(ArithmeticException ex) {
+            return frames.get(0);
+        }
     }
 
     public static int getEmoteCount() {
