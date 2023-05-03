@@ -23,7 +23,7 @@ import java.util.List;
 
 public class TwitchTokenSubcommand extends TwitchSubcommand {
 
-    private static final String authLink = "https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=q7s0qfrigoczrj1a1cltcebjx95q8g&redirect_uri=http://localhost:39571&scope=chat:read+chat:edit+channel:moderate+channel:manage:broadcast+user:edit:broadcast+clips:edit";
+    private static final String authLink = "https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=q7s0qfrigoczrj1a1cltcebjx95q8g&redirect_uri=http://localhost:39571&scope=channel:read:redemptions+chat:read+chat:edit+channel:moderate+channel:manage:broadcast+user:edit:broadcast+clips:edit+channel:read:subscriptions+bits:read";
 
     public TwitchTokenSubcommand(StreamChatMod mod, ICommandNode<TwitchSubcommand> parentCommand) {
         super(mod, parentCommand);
